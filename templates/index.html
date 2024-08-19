@@ -11,6 +11,7 @@
         <h1>レーベンシュタイン距離計算機</h1>
         <form id="levenshtein-form" onsubmit="event.preventDefault(); addString();">
             <label for="input-string">文字列を入力してください:</label>
+            ※カタカナ、ひらがな、漢字は区別されるので「ひらがな」に統一することをおすすめします
             <input type="text" id="input-string" required>
             <button type="button" onclick="addString()">追加する</button>
             <button type="button" onclick="removeLastString()">最後の文字列を削除</button>
