@@ -57,4 +57,4 @@ def calculate():
     return jsonify({'distance': distance, 'steps': steps, 'simulation': simulation})
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=False)
