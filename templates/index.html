@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>レーベンシュタイン距離計算機</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>レーベンシュタイン距離計算機</h1>
+        <form id="levenshtein-form" onsubmit="event.preventDefault(); addString();">
+            <label for="input-string">文字列を入力してください:</label>
+            <input type="text" id="input-string" required>
+            <button type="button" onclick="addString()">追加する</button>
+            <button type="button" onclick="removeLastString()">最後の文字列を削除</button>
+        </form>
+        <div id="next-string"></div>
+        <div id="results-container" class="results-container-horizontal"></div>
+    </div>
+
+    <script>
+        let strings = [];
+
+        function addString() {
+            const inputString = document.getElementById('input-string').value.trim();
+            if (inputString === "") {
+                alert("文字列を入力してください");
+                return;
+            }
+
+            strings.push(inputString);
+            document.getElementById('input-string').value = "";
+
+            updateNextString();
+
+            if (strings.length > 1) {
+                const prevString = strings[strings.length - 2];
+                const currentString = strings[strings.length - 1];
+
+                fetch('/calculate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ S1: prevString, S2: currentString })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    displayResult(prevString, currentString, data.distance, data.steps, data.simulation);
+                })
+                .catch(error => console.error('Error:', error));
+            }
+        }
+
+        function removeLastString() {
+            if (strings.length > 0) {
+                strings.pop();
+                const resultsContainer = document.getElementById('results-container');
+                if (resultsContainer.lastChild) {
+                    resultsContainer.removeChild(resultsContainer.lastChild);
+                }
+                updateNextString();
+            }
+        }
+
+        function updateNextString() {
+            const nextStringDiv = document.getElementById('next-string');
+            if (strings.length > 0) {
+                nextStringDiv.textContent = `次に比較される文字列: ${strings[strings.length - 1]}`;
+            } else {
+                nextStringDiv.textContent = "";
+            }
+        }
+
+        function displayResult(S1, S2, distance, steps, simulation) {
+            const resultsContainer = document.getElementById('results-container');
+
+            const resultDiv = document.createElement('div');
+            resultDiv.className = "result";
+            
+            const header = document.createElement('h2');
+            header.textContent = `${S1} と ${S2} のレーベンシュタイン距離: ${distance}`;
+            resultDiv.appendChild(header);
+
+            const stepsList = document.createElement('ol'); // 番号付きリスト
+
+            // steps が存在する場合にのみループを行う
+            if (steps && steps.length > 0) {
+                steps.reverse().forEach(step => {
+                    const listItem = document.createElement('li');
+                    listItem.textContent = step;
+                    stepsList.appendChild(listItem);
+                });
+            }
+            
+            resultDiv.appendChild(stepsList);
+
+            const simulationHeader = document.createElement('h3');
+            simulationHeader.textContent = "文字列の変化の過程:";
+            resultDiv.appendChild(simulationHeader);
+
+            const simulationList = document.createElement('ul');
+
+            // simulation が存在する場合にのみループを行う
+            if (simulation && simulation.length > 0) {
+                simulation.forEach((state, index) => {
+                    const listItem = document.createElement('li');
+                    listItem.textContent = `${index + 1}: ${state}`;
+                    simulationList.appendChild(listItem);
+                });
+            }
+
+            resultDiv.appendChild(simulationList);
+
+            // 結果をリストの最上部に挿入する
+            if (resultsContainer.firstChild) {
+                resultsContainer.insertBefore(resultDiv, resultsContainer.firstChild);
+            } else {
+                resultsContainer.appendChild(resultDiv);
+            }
+        }
+    </script>
+</body>
+</html>
