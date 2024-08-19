@@ -102,9 +102,9 @@
 
             const simulationList = document.createElement('ul');
 
-            // simulation が存在する場合にのみループを行う
+            // simulation が存在する場合にのみ逆順でループを行う
             if (simulation && simulation.length > 0) {
-                simulation.forEach((state, index) => {
+                simulation.reverse().forEach((state, index) => {
                     const listItem = document.createElement('li');
                     listItem.textContent = `${index + 1}: ${state}`;
                     simulationList.appendChild(listItem);
@@ -120,6 +120,7 @@
                 resultsContainer.appendChild(resultDiv);
             }
         }
+
     </script>
 </body>
 </html>
