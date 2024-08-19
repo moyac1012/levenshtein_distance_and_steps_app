@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, jsonify
+from waitress import serve
 
 app = Flask(__name__)
 
@@ -57,4 +58,4 @@ def calculate():
     return jsonify({'distance': distance, 'steps': steps, 'simulation': simulation})
 
 if __name__ == '__main__':
-    app.run(debug=False)
+    serve(app, host='0.0.0.0', port=5050)
